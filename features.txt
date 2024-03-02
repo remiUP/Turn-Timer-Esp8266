@@ -1,0 +1,17 @@
+
+
+ - Buttons
+	- Main Button
+		- Single press : pass 
+		- Long press : steal
+	- Secondary 1
+		- Single press : reorder
+	- Secondary 2
+		- Single press: admin time
+ - LED Light
+ - Buzzer sound
+ - Battery
+ - USB firmware upgrade
+ - Compact packing with charging
+ - Time display
+ - 
