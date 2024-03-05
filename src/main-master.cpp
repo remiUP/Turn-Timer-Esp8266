@@ -1,6 +1,10 @@
 #include <Arduino.h>
 #include <ESPNowW.h>
 #include <esp8266wifi.h>
+#include "LedStateMachine.h"
+#include "ComStateMachineMaster.h"
+#include "EventBroker.h"
+#include <Bounce2.h>
 
 uint8_t receiver_mac[] = {0x84, 0xf3, 0xeb, 0xbf, 0xc3, 0x9d};
 
@@ -8,11 +12,7 @@ uint8_t receiver_mac[] = {0x84, 0xf3, 0xeb, 0xbf, 0xc3, 0x9d};
 // Must match the receiver structure
 typedef struct struct_message
 {
-  char a[32];
-  int b;
-  float c;
-  String d;
-  bool e;
+  bool status;
 } struct_message;
 
 // Create a struct_message called myData
@@ -20,6 +20,14 @@ struct_message myData;
 
 unsigned long lastTime = 0;
 unsigned long timerDelay = 2000; // send readings timer
+LedStateMachine ledStateMachine;
+
+Bounce button = Bounce(D1, 100);
+
+ComStateMachineMaster comStateMachineMaster;
+EventBroker eventBroker;
+
+bool ledStatus = false;
 
 // Callback when data is sent
 void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus)
@@ -41,8 +49,9 @@ void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
   memcpy(&myData, incomingData, sizeof(myData));
   Serial.print("Bytes received: ");
   Serial.println(len);
-  Serial.print("Char: ");
-  Serial.println(myData.a);
+  Serial.print("Status: ");
+  Serial.println(myData.status);
+  ledStatus = myData.status;
 }
 
 void setup()
@@ -63,36 +72,49 @@ void setup()
     Serial.println("Error initializing ESP-NOW");
     return;
   }
+  ledStateMachine.init();
+
+  button.attach(D1, INPUT_PULLUP);
+  button.interval(50);
+
+  comStateMachineMaster.init(&ledStateMachine, &eventBroker);
 
   // Once ESPNow is successfully Init, we will register for Send CB to
   // get the status of Trasnmitted packet
-  esp_now_set_self_role(ESP_NOW_ROLE_CONTROLLER);
-  esp_now_register_send_cb(OnDataSent);
+  esp_now_set_self_role(ESP_NOW_ROLE_COMBO);
+
+  // Register for a callbacks from comStateMachine
 
   // Register peer
-  Serial.println(esp_now_add_peer(receiver_mac, ESP_NOW_ROLE_SLAVE, 1, NULL, 0));
+  Serial.println(esp_now_add_peer(receiver_mac, ESP_NOW_ROLE_COMBO, 1, NULL, 0));
 }
 
 void loop()
 {
-  if ((millis() - lastTime) > timerDelay)
+
+  if (button.fell())
   {
-    // Set values to send
-    strcpy(myData.a, "THIS IS A CHAR");
-    myData.b = random(1, 20);
-    myData.c = 1.2;
-    myData.d = "Hello";
-    myData.e = false;
-
-    // Send message via ESP-NOW
+    myData.status = true;
     esp_now_send(receiver_mac, (uint8_t *)&myData, sizeof(myData));
-
-    lastTime = millis();
+    Serial.println("Button pressed");
   }
-  // blink led to indicate data sending
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1000);
-  Serial.println("Test");
+  else if (button.rose())
+  {
+    myData.status = false;
+    esp_now_send(receiver_mac, (uint8_t *)&myData, sizeof(myData));
+    Serial.println("Button released");
+  }
+
+  if (ledStatus)
+  {
+    ledStateMachine.setState(LedState::ON);
+  }
+  else
+  {
+    ledStateMachine.setState(LedState::OFF);
+  }
+
+  ledStateMachine.update();
+  comStateMachineMaster.update();
+  button.update();
 }
