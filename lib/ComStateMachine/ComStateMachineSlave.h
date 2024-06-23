@@ -1,39 +1,40 @@
 #pragma once
-#include <EspNowW.h>
+#include <SPI.h>
+#include <ESPNowW.h>
 #include "LedStateMachine.h"
-#include "ComStateMachineI.h"
 #include "EventBroker.h"
+#include "HardwareSerial.h"
 #include <MacAddress.h>
 
-#define MAX_NUMBER_DEVICES 5
+#include "ComStateMachineI.h"
 
-enum ComStateMaster
+#define RETRY_DELAY 500
+#define ACK_TIMEOUT 2000
+
+enum class ComStateSlave
 {
 	STANDBY,
 	RADIO_UNRESPONSIVE,
 	SETUP_PAIRING,
-	WAITING_CRQST,
-	SEND_APP,
+	PAIRING,
+	WAITING_ADRS,
 	SETUP_LISTENING,
 	LISTENING,
 	CONNECTED,
 };
 
-class ComStateMachineMaster : public ComStateMachineI
+class ComStateMachineSlave : public ComStateMachineI
 {
 private:
-	MacAddress address[MAX_NUMBER_DEVICES];
-	ComStateMaster comState = ComStateMaster::STANDBY;
-	int getDeviceIndex(MacAddress macAddress);
+	ComStateSlave comState = ComStateSlave::STANDBY;
 	EventBroker *eventBroker;
+	MacAddress server;
 
 public:
 	void init(LedStateMachine *, EventBroker *);
 	void update();
-	int send(int deviceId);
-	void sendAll();
-	void setState(ComStateMaster);
-	uint8_t getNumberDevices();
+	int send();
+	void setState(ComStateSlave);
 	void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len);
 	void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus);
 };

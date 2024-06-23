@@ -32,4 +32,5 @@ public:
 	size_t printTo(Print &p) const;
 	uint8_t *getMacAddress();
 	void setMacAddress(uint8_t *);
+	void setMacAddressBroadcast();
 };

@@ -2,6 +2,7 @@
 #include "LedStateMachine.h"
 #include <ESPNowW.h>
 #include <MacAddress.h>
+#include "EventBroker.h"
 
 enum PayloadType
 {
@@ -22,7 +23,7 @@ struct Payload
 	uint32_t data;
 };
 
-#include <MacAddress.h>
+static_assert(sizeof(Payload) < 250, "Payload size is too big, must be less than 255 bytes");
 
 struct ReceivedPayload
 {
@@ -34,18 +35,17 @@ struct ReceivedPayload
 class ComStateMachineI
 {
 protected:
-	uint8_t role;
 	bool payloadAvailable = false;
 	Payload payload;
 	ReceivedPayload receivedPayload;
 	uint16_t previous;
+	EventBroker *eventBroker;
 	LedStateMachine *ledStateMachine;
 	ReceivedPayload getReceivedPayload();
 
 public:
 	virtual void update() = 0;
-	virtual int send(int) = 0;
-	virtual void init();
+	virtual void init(LedStateMachine *, EventBroker *) = 0;
 	void setPayloadType(PayloadType);
 	void setPayloadData(uint32_t);
 };

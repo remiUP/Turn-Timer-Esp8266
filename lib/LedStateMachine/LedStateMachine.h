@@ -1,7 +1,7 @@
 #pragma once
 #include <FastLED.h>
-#define NUM_LEDS 2
-#define LED_DATA_PIN 0
+#define NUM_LEDS 4
+#define LED_DATA_PIN D4
 
 #define ANIMATION_TIME 3000
 

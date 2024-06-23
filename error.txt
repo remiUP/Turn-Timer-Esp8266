@@ -1,0 +1,15 @@
+Exception (28):
+epc1=0x4020696b epc2=0x00000000 epc3=0x00000000 excvaddr=0x00000001 depc=0x00000000
+
+>>>stack>>>
+
+ctx: cont
+sp: 3ffffe00 end: 3fffffc0 offset: 0150
+3fffff50:  3fffdad0 00000000 3ffee9c4 40201d05  
+3fffff60:  3fffdad0 00000000 3ffee93c 002015a4  
+3fffff70:  40200000 00000000 3ffee954 402015d0  
+3fffff80:  402013d6 00000000 3fffdab0 40201405  
+3fffff90:  00000000 0011001f 00000000 feefeffe  
+3fffffa0:  feefeffe feefeffe 3fffdab0 402038f6  
+3fffffb0:  feefeffe feefeffe feefeffe 40100f0d  
+<<<stack<<<

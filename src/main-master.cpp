@@ -5,60 +5,31 @@
 #include "ComStateMachineMaster.h"
 #include "EventBroker.h"
 #include <Bounce2.h>
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
-uint8_t receiver_mac[] = {0x84, 0xf3, 0xeb, 0xbf, 0xc3, 0x9d};
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 32 // OLED display height, in pixels
 
-// Structure example to send data
-// Must match the receiver structure
-typedef struct struct_message
-{
-  bool status;
-} struct_message;
+#define OLED_RESET -1       // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-// Create a struct_message called myData
-struct_message myData;
-
-unsigned long lastTime = 0;
-unsigned long timerDelay = 2000; // send readings timer
 LedStateMachine ledStateMachine;
 
-Bounce button = Bounce(D1, 100);
+Bounce button = Bounce();
 
 ComStateMachineMaster comStateMachineMaster;
 EventBroker eventBroker;
-
-bool ledStatus = false;
-
-// Callback when data is sent
-void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus)
-{
-  Serial.print("Last Packet Send Status: ");
-  if (sendStatus == 0)
-  {
-    Serial.println("Delivery success");
-  }
-  else
-  {
-    Serial.println("Delivery fail");
-  }
-}
-
-// Callback function that will be executed when data is received
-void OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
-{
-  memcpy(&myData, incomingData, sizeof(myData));
-  Serial.print("Bytes received: ");
-  Serial.println(len);
-  Serial.print("Status: ");
-  Serial.println(myData.status);
-  ledStatus = myData.status;
-}
 
 void setup()
 {
   // Init Serial Monitor
   Serial.begin(9600);
   pinMode(LED_BUILTIN, OUTPUT);
+  Serial.println("Alive");
 
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
@@ -66,15 +37,9 @@ void setup()
   Serial.print("MAC Address: ");
   Serial.println(WiFi.macAddress());
 
-  // Init ESP-NOW
-  if (esp_now_init() != 0)
-  {
-    Serial.println("Error initializing ESP-NOW");
-    return;
-  }
   ledStateMachine.init();
 
-  button.attach(D1, INPUT_PULLUP);
+  button.attach(D7, INPUT_PULLUP);
   button.interval(50);
 
   comStateMachineMaster.init(&ledStateMachine, &eventBroker);
@@ -83,10 +48,34 @@ void setup()
   // get the status of Trasnmitted packet
   esp_now_set_self_role(ESP_NOW_ROLE_COMBO);
 
-  // Register for a callbacks from comStateMachine
+  pinMode(D5, OUTPUT);
+  pinMode(D7, INPUT_PULLUP);
 
-  // Register peer
-  Serial.println(esp_now_add_peer(receiver_mac, ESP_NOW_ROLE_COMBO, 1, NULL, 0));
+  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
+  {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;)
+      ; // Don't proceed, loop forever
+  }
+
+  display.clearDisplay();
+
+  display.setTextSize(1);              // Normal 1:1 pixel scale
+  display.setTextColor(SSD1306_WHITE); // Draw white text
+  display.setCursor(0, 0);             // Start at top-left corner
+  display.cp437(true);                 // Use full 256 char 'Code Page 437' font
+
+  // Not all the characters will fit on the display. This is normal.
+  // Library will draw what it can and the rest will be clipped.
+  for (int16_t i = 0; i < 256; i++)
+  {
+    if (i == '\n')
+      display.write(' ');
+    else
+      display.write(i);
+  }
+
+  display.display();
 }
 
 void loop()
@@ -94,24 +83,16 @@ void loop()
 
   if (button.fell())
   {
-    myData.status = true;
-    esp_now_send(receiver_mac, (uint8_t *)&myData, sizeof(myData));
-    Serial.println("Button pressed");
-  }
-  else if (button.rose())
-  {
-    myData.status = false;
-    esp_now_send(receiver_mac, (uint8_t *)&myData, sizeof(myData));
-    Serial.println("Button released");
-  }
-
-  if (ledStatus)
-  {
-    ledStateMachine.setState(LedState::ON);
-  }
-  else
-  {
-    ledStateMachine.setState(LedState::OFF);
+    for (int i = 0; i < 100; i++)
+    {
+      digitalWrite(D5, LOW);
+      delayMicroseconds(125);
+      digitalWrite(D5, HIGH);
+      delayMicroseconds(125);
+    }
+    Event event;
+    event.eventType = EventType::SHORT;
+    eventBroker.addEvent(event);
   }
 
   ledStateMachine.update();

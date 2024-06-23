@@ -1,0 +1,1 @@
+python .\decoder.py -p ESP8266 -e .pio/build/master/firmware.elf .\error.txt -s

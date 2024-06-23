@@ -38,3 +38,11 @@ void MacAddress::setMacAddress(uint8_t *mac)
 		this->mac[i] = mac[i];
 	}
 };
+
+void MacAddress::setMacAddressBroadcast()
+{
+	for (int i = 0; i < 6; i++)
+	{
+		this->mac[i] = 0xff;
+	}
+};

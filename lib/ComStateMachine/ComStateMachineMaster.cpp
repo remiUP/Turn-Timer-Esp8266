@@ -28,8 +28,11 @@ void ComStateMachineMaster::init(LedStateMachine *ledStateMachine, EventBroker *
 
 void ComStateMachineMaster::OnDataRecv(uint8_t *mac, uint8_t *incomingData, uint8_t len)
 {
-	memcpy(&receivedPayload, incomingData, sizeof(receivedPayload));
+	Payload incomingPayload;
+	memcpy(&incomingPayload, incomingData, sizeof(incomingPayload));
 	receivedPayload.macAddress.setMacAddress(mac);
+	receivedPayload.payloadType = incomingPayload.payloadType;
+	receivedPayload.data = incomingPayload.data;
 	payloadAvailable = true;
 	Serial.print("Bytes received: ");
 	Serial.println(len);
@@ -138,13 +141,13 @@ void ComStateMachineMaster::update()
 			int deviceIndex = getDeviceIndex(receivedPayload.macAddress);
 			if (deviceIndex != -1)
 			{
-				Serial.print("Device already known");
+				Serial.println("Device already known");
 				comState = ComStateMaster::SEND_APP;
 				return;
 			}
 			else
 			{
-				Serial.print("New device");
+				Serial.println("New device");
 			}
 			delay(10);
 		}
@@ -158,6 +161,7 @@ void ComStateMachineMaster::update()
 		{
 			Serial.println("Successfully sent APP");
 			this->address[getNumberDevices()].setMacAddress(receivedPayload.macAddress);
+			esp_now_add_peer(receivedPayload.macAddress, ESP_NOW_ROLE_COMBO, 1, NULL, 0);
 			ledStateMachine->setState(LedState::PAIRED);
 		}
 		else
