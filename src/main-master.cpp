@@ -10,6 +10,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include "Constants.h"
 
 ScreenStateMachine screenStateMachine;
 LedStateMachine ledStateMachine;
@@ -34,18 +35,17 @@ void setup()
 
   ledStateMachine.init();
 
-  button.attach(D7, INPUT_PULLUP);
+  button.attach(BUTTON_PIN, INPUT_PULLUP);
   button.interval(50);
 
   comStateMachineMaster.init(&ledStateMachine, &eventBroker);
+  screenStateMachine.init(&eventBroker);
 
   // Once ESPNow is successfully Init, we will register for Send CB to
   // get the status of Trasnmitted packet
   esp_now_set_self_role(ESP_NOW_ROLE_COMBO);
 
-  screenStateMachine.init();
-
-  pinMode(D5, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
 }
 
 void loop()
@@ -55,9 +55,9 @@ void loop()
   {
     for (int i = 0; i < 100; i++)
     {
-      digitalWrite(D5, LOW);
+      digitalWrite(BUZZER_PIN, LOW);
       delayMicroseconds(125);
-      digitalWrite(D5, HIGH);
+      digitalWrite(BUZZER_PIN, HIGH);
       delayMicroseconds(125);
     }
     Event event;
@@ -66,7 +66,7 @@ void loop()
   }
 
   ledStateMachine.update();
-  comStateMachineMaster.update();
   screenStateMachine.update();
+  comStateMachineMaster.update();
   button.update();
 }

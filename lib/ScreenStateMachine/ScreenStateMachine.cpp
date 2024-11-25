@@ -1,7 +1,8 @@
 #include "ScreenStateMachine.h"
 
-void ScreenStateMachine::init()
+void ScreenStateMachine::init(EventBroker *eventBroker)
 {
+	this->eventBroker = eventBroker;
 	if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
 	{
 		Serial.println(F("SSD1306 allocation failed"));
@@ -29,6 +30,16 @@ String ScreenStateMachine::getTime()
 		   (seconds < 10 ? "0" : "") + String(seconds);
 }
 
+void ScreenStateMachine::printTime()
+{
+	display.clearDisplay();
+	display.setTextSize(2); // Draw 2X-scale text
+	display.setTextColor(SSD1306_WHITE);
+	display.setCursor(18, 8);
+	display.println(this->getTime());
+	display.display();
+}
+
 void ScreenStateMachine::setState(ScreenState screenState)
 {
 	this->screenState = screenState;
@@ -41,6 +52,22 @@ ScreenState ScreenStateMachine::getState()
 
 void ScreenStateMachine::update()
 {
+	Event event = this->eventBroker->getEvent();
+	if (event.eventType == EventType::SHORT)
+	{
+		if (this->getState() == ScreenState::OFF)
+		{
+			this->setState(ScreenState::COUNTING);
+		}
+		else if (this->getState() == ScreenState::COUNTING)
+		{
+			this->setState(ScreenState::PAUSED);
+		}
+		else if (this->getState() == ScreenState::PAUSED)
+		{
+			this->setState(ScreenState::OFF);
+		}
+	}
 	switch (this->screenState)
 	{
 	case ScreenState::OFF:
@@ -58,12 +85,7 @@ void ScreenStateMachine::update()
 			previous = ScreenState::COUNTING;
 			start = millis();
 		}
-		display.clearDisplay();
-		display.setTextSize(2); // Draw 2X-scale text
-		display.setTextColor(SSD1306_WHITE);
-		display.setCursor(18, 8);
-		display.println(this->getTime());
-		display.display();
+		this->printTime();
 		break;
 	case ScreenState::PAUSED:
 		if (previous != ScreenState::PAUSED)
@@ -71,12 +93,7 @@ void ScreenStateMachine::update()
 			this->total += millis() - start;
 			previous = ScreenState::PAUSED;
 		}
-		display.clearDisplay();
-		display.setTextSize(2); // Draw 2X-scale text
-		display.setTextColor(SSD1306_WHITE);
-		display.setCursor(18, 8);
-		display.println(this->getTime());
-		display.display();
+		this->printTime();
 		break;
 	default:
 		this->screenState = ScreenState::OFF;
