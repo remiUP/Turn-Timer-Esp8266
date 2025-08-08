@@ -3,7 +3,7 @@
 void ScreenStateMachine::init(EventBroker *eventBroker)
 {
 	this->eventBroker = eventBroker;
-	if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
+        if (!display.begin(SSD1306_SWITCHCAPVCC, config::SCREEN_ADDRESS))
 	{
 		Serial.println(F("SSD1306 allocation failed"));
 	}

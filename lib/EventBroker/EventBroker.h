@@ -1,8 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "HardwareSerial.h"
-
-#define EVENTQSIZE 5
+#include "Constants.h"
 
 enum class EventType
 {
@@ -21,9 +20,9 @@ struct Event
 class EventBroker
 {
 private:
-	uint8_t bufferSize = EVENTQSIZE;
-	uint8_t eventsInBuffer = 0;
-	Event events[EVENTQSIZE];
+        uint8_t bufferSize = config::EVENTQSIZE;
+        uint8_t eventsInBuffer = 0;
+        Event events[config::EVENTQSIZE];
 
 public:
 	void addEvent(Event);

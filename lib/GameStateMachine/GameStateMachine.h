@@ -4,8 +4,6 @@
 #include "EventBroker.h"
 #include "ComStateMachineMaster.h"
 
-#define ANIMATION_TIME 3000
-
 enum class GameState
 {
 	SETUP,

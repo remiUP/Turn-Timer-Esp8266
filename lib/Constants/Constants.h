@@ -1,27 +1,35 @@
+#pragma once
+
+#include <Arduino.h>
+
+namespace config {
 
 // WiFi
-#define RETRY_DELAY 500
-#define ACK_TIMEOUT 2000
+constexpr uint16_t RETRY_DELAY = 500;
+constexpr uint16_t ACK_TIMEOUT = 2000;
 
 // EventBroker
-#define EVENTQSIZE 5
+constexpr uint8_t EVENTQSIZE = 5;
 
 // ComStateMachine
-#define MAX_NUMBER_DEVICES 5
+constexpr uint8_t MAX_NUMBER_DEVICES = 5;
 
 // LED
-#define NUM_LEDS 4
-#define LED_DATA_PIN D4
-#define ANIMATION_TIME 3000
+constexpr uint8_t NUM_LEDS = 4;
+constexpr uint8_t LED_DATA_PIN = D4;
+constexpr unsigned long ANIMATION_TIME = 3000;
 
 // Screen
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 32
-#define OLED_RESET -1
-#define SCREEN_ADDRESS 0x3C
+constexpr uint8_t SCREEN_WIDTH = 128;
+constexpr uint8_t SCREEN_HEIGHT = 32;
+constexpr int8_t OLED_RESET = -1;
+constexpr uint8_t SCREEN_ADDRESS = 0x3C;
 
 // Buzzer
-#define BUZZER_PIN D5
+constexpr uint8_t BUZZER_PIN = D5;
 
 // Button
-#define BUTTON_PIN D7
+constexpr uint8_t BUTTON_PIN = D7;
+
+}  // namespace config
+

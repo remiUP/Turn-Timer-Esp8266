@@ -5,8 +5,7 @@
 #include "ComStateMachineI.h"
 #include "EventBroker.h"
 #include "LedStateMachine.h"
-
-#define MAX_NUMBER_DEVICES 5
+#include "Constants.h"
 
 enum ComStateMaster {
   STANDBY,
@@ -21,7 +20,7 @@ enum ComStateMaster {
 
 class ComStateMachineMaster : public ComStateMachineI {
  private:
-  MacAddress address[MAX_NUMBER_DEVICES];
+  MacAddress address[config::MAX_NUMBER_DEVICES];
   ComStateMaster comState = ComStateMaster::STANDBY;
   int getDeviceIndex(MacAddress macAddress);
   EventBroker *eventBroker;
