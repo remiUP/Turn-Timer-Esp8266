@@ -59,7 +59,7 @@ void ComStateMachineMaster::OnDataSent(uint8_t *mac_addr, uint8_t sendStatus) {
 }
 
 int ComStateMachineMaster::getDeviceIndex(MacAddress macAddress) {
-  for (uint8_t i = 0; i < MAX_NUMBER_DEVICES; i++) {
+  for (uint8_t i = 0; i < config::MAX_NUMBER_DEVICES; i++) {
     if (this->address[i] == macAddress) {
       return i;
     }
@@ -77,7 +77,7 @@ int ComStateMachineMaster::send(int deviceId) {
 };
 
 void ComStateMachineMaster::sendAll() {
-  for (uint8_t i = 0; i < MAX_NUMBER_DEVICES; i++) {
+  for (uint8_t i = 0; i < config::MAX_NUMBER_DEVICES; i++) {
     Serial.println("Sending");
     Serial.print("Sending payload type :");
     Serial.println(payload.payloadType);

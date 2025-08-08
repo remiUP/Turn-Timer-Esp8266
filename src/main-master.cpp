@@ -35,7 +35,7 @@ void setup()
 
   ledStateMachine.init();
 
-  button.attach(BUTTON_PIN, INPUT_PULLUP);
+  button.attach(config::BUTTON_PIN, INPUT_PULLUP);
   button.interval(50);
 
   comStateMachineMaster.init(&ledStateMachine, &eventBroker);
@@ -45,7 +45,7 @@ void setup()
   // get the status of Trasnmitted packet
   esp_now_set_self_role(ESP_NOW_ROLE_COMBO);
 
-  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(config::BUZZER_PIN, OUTPUT);
 }
 
 void loop()
@@ -55,9 +55,9 @@ void loop()
   {
     for (int i = 0; i < 100; i++)
     {
-      digitalWrite(BUZZER_PIN, LOW);
+      digitalWrite(config::BUZZER_PIN, LOW);
       delayMicroseconds(125);
-      digitalWrite(BUZZER_PIN, HIGH);
+      digitalWrite(config::BUZZER_PIN, HIGH);
       delayMicroseconds(125);
     }
     Event event;

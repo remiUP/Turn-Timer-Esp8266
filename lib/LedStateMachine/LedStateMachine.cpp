@@ -10,11 +10,11 @@ double nExp(const double x, const double coef)
 	return (exp(x * coef) - 1) / (exp(coef) - 1);
 }
 
-void smoothRotation(const CRGB &color, const unsigned int period, CRGB (&leds)[NUM_LEDS])
+void smoothRotation(const CRGB &color, const unsigned int period, CRGB (&leds)[config::NUM_LEDS])
 {
-	for (int i = 0; i < NUM_LEDS; i++)
-	{
-		double intensity = nExp(nSin(millis(), period, (double)i / NUM_LEDS), 1);
+        for (int i = 0; i < config::NUM_LEDS; i++)
+        {
+                double intensity = nExp(nSin(millis(), period, (double)i / config::NUM_LEDS), 1);
 		leds[i].red = color.red * intensity;
 		leds[i].green = color.green * intensity;
 		leds[i].blue = color.blue * intensity;
@@ -22,16 +22,16 @@ void smoothRotation(const CRGB &color, const unsigned int period, CRGB (&leds)[N
 	FastLED.show();
 }
 
-void breathe(const CRGB &color, const unsigned int period, CRGB (&leds)[NUM_LEDS], uint8_t depth)
+void breathe(const CRGB &color, const unsigned int period, CRGB (&leds)[config::NUM_LEDS], uint8_t depth)
 {
-	double intensity = nExp(nSin(millis(), period, 0), 1) * (double)depth / 255 + 1 - (double)depth / 255;
-	fill_solid(leds, NUM_LEDS, CRGB(color.r * intensity, color.g * intensity, color.b * intensity));
-	FastLED.show();
+        double intensity = nExp(nSin(millis(), period, 0), 1) * (double)depth / 255 + 1 - (double)depth / 255;
+        fill_solid(leds, config::NUM_LEDS, CRGB(color.r * intensity, color.g * intensity, color.b * intensity));
+        FastLED.show();
 }
 
 void LedStateMachine::init()
 {
-	FastLED.addLeds<WS2812, LED_DATA_PIN, GRB>(leds, NUM_LEDS); // GRB ordering is typical
+        FastLED.addLeds<WS2812, config::LED_DATA_PIN, GRB>(leds, config::NUM_LEDS); // GRB ordering is typical
 	FastLED.setBrightness(50);
 }
 LedState previous = LedState::IDLE;
@@ -57,7 +57,7 @@ void LedStateMachine::update()
 		if (previous != LedState::OFF)
 		{
 			previous = LedState::OFF;
-			fill_solid(leds, NUM_LEDS, CRGB::Black);
+                        fill_solid(leds, config::NUM_LEDS, CRGB::Black);
 			FastLED.show();
 			Serial.println("LED STATE : OFF");
 		}
@@ -104,7 +104,7 @@ void LedStateMachine::update()
 		if (previous != LedState::ERROR)
 		{
 			previous = LedState::ERROR;
-			fill_solid(leds, NUM_LEDS, CRGB::Red);
+                        fill_solid(leds, config::NUM_LEDS, CRGB::Red);
 			FastLED.show();
 			Serial.println("LED STATE : ERROR");
 			this->ledState = LedState::IDLE;

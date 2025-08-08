@@ -89,7 +89,7 @@ void ComStateMachineSlave::update()
 	}
 	case ComStateSlave::PAIRING:
 	{
-		if (millis() - previous > RETRY_DELAY)
+                if (millis() - previous > config::RETRY_DELAY)
 		{
 			Serial.println(millis());
 			if (send() == 0)
@@ -117,7 +117,7 @@ void ComStateMachineSlave::update()
 			server.setMacAddress(receivedPayload.macAddress);
 			esp_now_add_peer(receivedPayload.macAddress, ESP_NOW_ROLE_COMBO, 1, NULL, 0);
 		}
-		else if (millis() - previous > ACK_TIMEOUT)
+                else if (millis() - previous > config::ACK_TIMEOUT)
 		{
 			Serial.println(millis() - previous);
 			Serial.println("APP timed out");

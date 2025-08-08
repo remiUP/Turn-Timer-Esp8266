@@ -7,9 +7,7 @@
 #include <MacAddress.h>
 
 #include "ComStateMachineI.h"
-
-#define RETRY_DELAY 500
-#define ACK_TIMEOUT 2000
+#include "Constants.h"
 
 enum class ComStateSlave
 {
